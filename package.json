@@ -1,0 +1,25 @@
+{
+  "name": "packages",
+  "version": "1.0.0",
+  "description": "This package holds defines all necessary modules needed for nodejs to run.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RaisinBread42/CISC397.git"
+  },
+  "author": "Shannon Williams",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RaisinBread42/CISC397/issues"
+  },
+  "homepage": "https://github.com/RaisinBread42/CISC397#readme",
+  "dependencies": {
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "mongoose": "^5.0.3"
+  }
+}
