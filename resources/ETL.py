@@ -47,8 +47,8 @@ def readFile(filename):
                 }
 
                 # enter into markers collection
-                result = db.markers.insert_one(marker)
-                print(f'Inserted record with objectid: {result.inserted_id} successfully')
+                result = db.markers.update(marker, marker, upsert = True)
+                print(result)
     print('Data Transfer Successful !')
 
 
