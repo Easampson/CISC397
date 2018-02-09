@@ -7,7 +7,7 @@
 #---------------------------------------------------------
 
 # Python version 3+
-# Ensure to have pip3 installed -- python3 -m pip3 install pymongo
+# Ensure to have pymongo installed -- python3 -m pip3 install pymongo
 from pymongo import MongoClient
 
 client = MongoClient(port=27017)
