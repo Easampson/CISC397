@@ -24,6 +24,9 @@ function sendMail(){
         auth: {
             user: 'ubuntu', // generated ethereal user
             pass: 'Password123!'  // generated ethereal password
+        },
+        tls: {
+            rejectUnauthorized: false
         }
     });
 
