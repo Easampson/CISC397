@@ -16,27 +16,23 @@ app.listen(3000, () =>{ console.log("Server listening on port 3000 !")});
 /*---------------SMTP Email Functions--------------------*/
 let host = 'ec2-18-219-163-99.us-east-2.compute.amazonaws.com';
 
-function sendMail(){
-    let transporter = nodemailer.createTransport({
-        host: host,
-        port: 25,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: 'ubuntu', // generated ethereal user
-            pass: 'Password123!'  // generated ethereal password
-        },
-        tls: {
-            rejectUnauthorized: false
-        }
-    });
+function sendMail(recipient, temppass){
+  let transporter = nodemailer.createTransport({
+      host: 'localhost',
+      secure: false,
+      port: 25,
+      tls: {
+              rejectUnauthorized: false
+      }
+  });
 
     // setup email data with unicode symbols
     let mailOptions = {
-        from: 'Ubuntu user <ubuntu@ec2-18-219-163-99.us-east-2.compute.amazonaws.com>', // sender address
-        to: 'williamsshannonj@gmail.com', // list of receivers
-        subject: 'Hello ✔', // Subject line
-        text: 'Hello world?', // plain text body
-        html: '<b>Hello world?</b>' // html body
+        from: 'PA History Finder <ubuntu@ec2-18-219-163-99.us-east-2.compute.amazonaws.com>', // sender address
+        to: recipient, // list of receivers
+        subject: 'Thank you for signing up ✔', // Subject line
+        text: '${tempass} was assigned to me....', // plain text body
+        html: '<b>${tempass} was assigned to me....</b>' // html body
     };
 
     // send mail with defined transport object
@@ -54,4 +50,4 @@ function sendMail(){
 
   }
 
-  sendMail();
+  sendMail('williamsshannonj@gmail.com','tempass');
