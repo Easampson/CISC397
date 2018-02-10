@@ -21,10 +21,6 @@ function sendMail(){
         host: host,
         port: 25,
         secure: false, // true for 465, false for other ports
-        auth: {
-            user: 'ubuntu', // generated ethereal user
-            pass: 'Password123!'  // generated ethereal password
-        },
         tls: {
             rejectUnauthorized: false
         }
