@@ -21,6 +21,10 @@ function sendMail(){
         host: host,
         port: 25,
         secure: false, // true for 465, false for other ports
+        auth: {
+            user: 'ubuntu', // generated ethereal user
+            pass: 'Password123!'  // generated ethereal password
+        },
         tls: {
             rejectUnauthorized: false
         }
@@ -28,7 +32,7 @@ function sendMail(){
 
     // setup email data with unicode symbols
     let mailOptions = {
-        from: 'Ubuntu <ubuntu@ec2-18-219-163-99.us-east-2.compute.amazonaws.com>', // sender address
+        from: 'Ubuntu user <ubuntu@ec2-18-219-163-99.us-east-2.compute.amazonaws.com>', // sender address
         to: 'williamsshannonj@gmail.com', // list of receivers
         subject: 'Hello ✔', // Subject line
         text: 'Hello world?', // plain text body
