@@ -32,7 +32,7 @@ function sendMail(recipient, temppass){
         to: recipient, // list of receivers
         subject: 'Thank you for signing up ✔', // Subject line
         text: '${tempass} was assigned to me....', // plain text body
-        html: '<b>${tempass} was assigned to me....</b>' // html body
+        html: '<b>Your temp password is '+tempass+'. Use it to sign in and PLEASE change the password to one that you will remember :)</b>' // html body
     };
 
     // send mail with defined transport object
@@ -49,5 +49,3 @@ function sendMail(recipient, temppass){
     });
 
   }
-
-  sendMail('williamsshannonj@gmail.com','tempass');
