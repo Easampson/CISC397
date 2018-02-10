@@ -31,7 +31,7 @@ function sendMail(recipient, temppass){
         from: 'PA History Finder <ubuntu@ec2-18-219-163-99.us-east-2.compute.amazonaws.com>', // sender address
         to: recipient, // list of receivers
         subject: 'Thank you for signing up ✔', // Subject line
-        text: '${tempass} was assigned to me....', // plain text body
+        text: temppass+' was assigned to me....', // plain text body
         html: '<b>Your temp password is '+temppass+'. Use it to sign in and PLEASE change the password to one that you will remember :)</b>' // html body
     };
 
