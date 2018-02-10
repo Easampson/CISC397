@@ -28,7 +28,7 @@ function sendMail(){
 
     // setup email data with unicode symbols
     let mailOptions = {
-        from: 'Ubuntu user <ubuntu@${host}>', // sender address
+        from: 'Ubuntu <ubuntu@ec2-18-219-163-99.us-east-2.compute.amazonaws.com>', // sender address
         to: 'williamsshannonj@gmail.com', // list of receivers
         subject: 'Hello ✔', // Subject line
         text: 'Hello world?', // plain text body
