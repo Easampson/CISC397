@@ -18,8 +18,12 @@
   },
   "homepage": "https://github.com/RaisinBread42/CISC397#readme",
   "dependencies": {
+    "assert": "^1.4.1",
+    "body-parser": "^1.18.2",
     "ejs": "^2.5.7",
     "express": "^4.16.2",
-    "mongodb": "^3.0.2"
+    "mongodb": "^3.0.2",
+    "nodemailer": "^4.4.2",
+    "promise": "^8.0.1"
   }
 }

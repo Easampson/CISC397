@@ -1,23 +1,67 @@
-var express = require('express');
-var nodemailer = require('nodemailer');
+const Express = require('express');
+const BodyParser = require('body-parser');
+const NodeMailer = require('nodemailer');
+const MongoClient = require('mongodb').MongoClient;
+const Promise = require('promise');
+const Assert = require('assert');
+const Repository = require('./repository');
 
-var app = express();
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+var app = Express();
 app.set('view engine', 'ejs');
+app.use(BodyParser.json()); // for parsing application/json
+app.use(BodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-/*---------------Index Routing--------------------*/
+/*---------------Page Routing--------------------*/
 
 app.get('/', (req,res)=>{
   res.render('index');
 });
 
+/*---------------Select2 Requests--------------------*/
+
+app.post('/NameOfMarkerList', (req,res) =>{
+let term = req.body.term;
+Repository.searchInMarkerList(MongoClient, url, term).then( (items) => {
+  res.send(items);
+});
+});
+
+app.post('/CountyList', (req,res) =>{
+let term = req.body.term;
+Repository.searchCountyList(MongoClient, url, term).then( (items) => {
+  res.send(items);
+});
+});
+
+app.post('/CategoryList', (req,res) =>{
+let term = req.body.term;
+Repository.searchCategoryList(MongoClient, url, term).then( (items) => {
+  res.send(items);
+});
+});
+
+app.post('/LocationDescriptionList', (req,res) =>{
+let term = req.body.term;
+Repository.searchLocationDescriptionList(MongoClient, url, term).then( (items) => {
+  res.send(items);
+});
+});
+
+
+/*---------------Starting the Server--------------------*/
+
 
 app.listen(3000, () =>{ console.log("Server listening on port 3000 !")});
+
 
 /*---------------SMTP Email Functions--------------------*/
 let host = 'ec2-18-219-163-99.us-east-2.compute.amazonaws.com';
 
 function sendMail(recipient, temppass){
-  let transporter = nodemailer.createTransport({
+  let transporter = NodeMailer.createTransport({
       host: 'localhost',
       secure: false,
       port: 25,
@@ -43,9 +87,6 @@ function sendMail(recipient, temppass){
         console.log('Message sent: %s', info.messageId);
         // Preview only available when sending through an Ethereal account
         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
     });
 
   }
