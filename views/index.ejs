@@ -26,36 +26,43 @@
     </div>
 
   <form class="form-horizontal">
-    <div class="form-group">
-       <label class="control-label col-sm-2" for="email"> Search Term:</label>
-       <div class="col-sm-10">
-         <select class="js-example-basic-single" name="searchterm">
-          <option value="street">Street Address</option>
-          <option value="time">Time Period</option>
-          <option value="...">...</option>
-          <option value="...">...</option>
-          <option value="...">...</option>
-          <option value="...">...</option>
-          <option value="...">...</option>
-          <option value="...">...</option>
-          <option value="...">...</option>
 
+    <!-- Name -->
+    <div class="form-group">
+       <label class="control-label col-sm-2" for="Name_Of_The_Marker">Name of Marker</label>
+       <div class="col-sm-10">
+         <select class="select2" name="Name_Of_The_Marker" url="/NameOfMarkerList" value="Begin typing to view options">
         </select>
        </div>
      </div>
+
+     <!-- County -->
      <div class="form-group">
-       <label class="control-label col-sm-2" for="pwd">Term:</label>
-       <div class="col-sm-10">
-         <input type="password" class="form-control" id="pwd" placeholder="Enter password">
-       </div>
-     </div>
+        <label class="control-label col-sm-2" for="County"> County:</label>
+        <div class="col-sm-10">
+          <select class="select2" name="County" url="/CountyList">
+         </select>
+        </div>
+      </div>
+
+     <!-- Category -->
      <div class="form-group">
-       <div class="col-sm-offset-2 col-sm-10">
-         <div class="checkbox">
-           <label><input type="checkbox"> Remember me ?</label>
+        <label class="control-label col-sm-2" for="Category"> Category:</label>
+        <div class="col-sm-10">
+          <select class="select2" name="Category" url="/CategoryList">
+         </select>
+        </div>
+      </div>
+
+      <!-- Location Description -->
+      <div class="form-group">
+         <label class="control-label col-sm-2" for="Location_Description"> Location Description:</label>
+         <div class="col-sm-10">
+           <select class="select2" name="Location_Description" url="/LocationDescriptionList">
+          </select>
          </div>
        </div>
-     </div>
+
      <div class="form-group">
        <div class="col-sm-offset-2 col-sm-10">
          <button type="submit" class="btn btn-primary">Submit</button>

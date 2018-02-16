@@ -2,32 +2,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script>
-
-  //get react library
-var React = require('react');
-var ReactDOM = require('react-dom');
-
-  class tag extends React.Component{
-    render(){
-      return(
-        <p>I was rendered using ReactJS !!</p>
-      );
-    }
-  }
-
-  //=======================================
-
-  ReactDOM.render(
-  <tag />,
-  document.getElementById('tag')
-  );
-
-  //=======================================
-
-
-
-
-
   // Script to open and close sidebar
   function w3_open() {
       document.getElementById("mySidebar").style.display = "block";
@@ -52,10 +26,38 @@ var ReactDOM = require('react-dom');
   // select2js
   // In your Javascript (external .js resource or <script> tag)
 $(document).ready(function() {
-    $('.js-example-basic-single').select2({
-      width: "80%"
+
+    $('.select2').each(function(){
+
+          let url = this.getAttribute("url");
+
+          $(this).select2({
+            placeholder:'Begin typing...',
+            allowClear: true,
+            width:"80%",
+            ajax: {
+              delay: 250,
+              url: url,
+              type:'POST',
+              dataType: 'json',
+              data: function (params) {
+                   var query = {
+                     term: params.term
+                   }
+                   // Query parameters will be ?search=[term]&type=public
+                   return query;
+                 },
+                 processResults: function (data) {
+                      // Tranforms the top-level key of the response object from 'items' to 'results'
+                      return {
+                        results: data.items
+                      };
+                }
+            }
+          });
     });
-});
+
+}); // end of document ready function
 
   </script>
 
