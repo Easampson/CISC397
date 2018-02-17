@@ -14,38 +14,45 @@ app.set('view engine', 'ejs');
 app.use(BodyParser.json()); // for parsing application/json
 app.use(BodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-/*---------------Page Routing--------------------*/
+/*---------------Page & Form Routing--------------------*/
 
 app.get('/', (req,res)=>{
   res.render('index');
 });
 
+app.post('/searchHistoryForMap', (req,res) =>{
+  let vm = req.body;
+  Repository.searchHistoryForMap(MongoClient, url, vm).then( (items) => {
+  res.send(items);
+});
+});
+
 /*---------------Select2 Requests--------------------*/
 
 app.post('/NameOfMarkerList', (req,res) =>{
-let term = req.body.term;
-Repository.searchInMarkerList(MongoClient, url, term).then( (items) => {
+  let term = req.body.term;
+  Repository.searchInMarkerList(MongoClient, url, term).then( (items) => {
   res.send(items);
 });
 });
 
 app.post('/CountyList', (req,res) =>{
-let term = req.body.term;
-Repository.searchCountyList(MongoClient, url, term).then( (items) => {
+  let term = req.body.term;
+  Repository.searchCountyList(MongoClient, url, term).then( (items) => {
   res.send(items);
 });
 });
 
 app.post('/CategoryList', (req,res) =>{
-let term = req.body.term;
-Repository.searchCategoryList(MongoClient, url, term).then( (items) => {
+  let term = req.body.term;
+  Repository.searchCategoryList(MongoClient, url, term).then( (items) => {
   res.send(items);
 });
 });
 
 app.post('/LocationDescriptionList', (req,res) =>{
-let term = req.body.term;
-Repository.searchLocationDescriptionList(MongoClient, url, term).then( (items) => {
+  let term = req.body.term;
+  Repository.searchLocationDescriptionList(MongoClient, url, term).then( (items) => {
   res.send(items);
 });
 });

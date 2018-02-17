@@ -1,8 +1,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
 <script>
-  // Script to open and close sidebar
+
+  // Script to open and close sidebar------------------------------------
   function w3_open() {
       document.getElementById("mySidebar").style.display = "block";
       document.getElementById("myOverlay").style.display = "block";
@@ -13,17 +15,87 @@
       document.getElementById("myOverlay").style.display = "none";
   }
 
-  // Google Maps JS API
+  // Google Maps JS API------------------------------------
 
   var map;
-        function initMap() {
-          map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: -34.397, lng: 150.644},
-            zoom: 8
-          });
-        }
+  var markers = [];
+  var infowindows = [];
 
-  // select2js
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: 39.952583, lng: -75.165222},
+      zoom: 8
+    });
+  }
+
+  function addmarkers(item){
+    var marker = new google.maps.Marker({
+              position: {lat:parseFloat(item.Latitude),lng:parseFloat(item.Longitude)},
+              map: map,
+              title: 'Hello World!'
+            });
+
+    markers.push(marker);
+    marker.setMap(map);
+
+
+    var contentString = '<div id="content">'+
+            '<div id="markerInfo">'+
+            '</div>'+
+            '<h1 class="firstHeading">'+item.Name_of_the_Marker+'</h1>'+
+            '<div id="bodyContent">'+
+            '<p>'+item.Marker_Description+'</p>'+
+            '</div>'+
+            '</div>';
+
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+
+    marker.addListener('click', function() {
+      infowindow.open(map, marker);
+    });
+
+    infowindows.push(infowindow);
+
+  }
+
+  function removemarkers(){
+    for (var i = 0; i < markers.length; i++) {
+     markers[i].setMap(null);
+   }
+    markers = [];
+    infowindows = [];
+  }
+
+  function onSubmit(){
+
+    // get form values
+    let hid = $('#Name_Of_The_Marker').val();
+    let cat = $('#Category').val();
+    let cty = $('#County').val();
+    let ld = $('#Location_Description').val();
+
+    $.ajax({
+          url: "/searchHistoryForMap",
+          dataType:'json',
+          data: {
+            Historical_Marker_Id:hid,
+            Category: cat,
+            County: cty,
+            Location_Description: ld
+          },
+          type: 'POST',
+          success: function (data){
+            removemarkers();
+            data.items.forEach( (el) =>{
+              addmarkers(el);
+            });
+          }
+  });
+}
+
+  // select2js------------------------------------
   // In your Javascript (external .js resource or <script> tag)
 $(document).ready(function() {
 
