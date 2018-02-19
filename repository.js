@@ -1,22 +1,20 @@
+const Models = require('./models/indexmodel');
 
 module.exports = {
   searchHistoryForMap: function (mongoclient, url, vm){
 
-           // build new query object from vm
-           let queryobject = {};
+     // build new query object from vm
+     let queryobject = Models.SearchFormModel;
 
-           if (vm.Historical_Marker_Id != '') {queryobject.Historical_Marker_Id = vm.Historical_Marker_Id}
-           if (vm.Category != '') {queryobject.Category = vm.Category}
-           if (vm.County != '') {queryobject.County = vm.County}
-           if (vm.Location_Description != '') {queryobject.Location_Description = vm.Location_Description}
+     if (vm.Historical_Marker_Id != '') {queryobject.Historical_Marker_Id = vm.Historical_Marker_Id}
+     if (vm.Category != '') {queryobject.Category = vm.Category}
+     if (vm.County != '') {queryobject.County = vm.County}
+     if (vm.Location_Description != '') {queryobject.Location_Description = vm.Location_Description}
 
-           console.log("object received " + vm);
-           console.log(queryobject);
-
-           // query db
-           return new Promise( (resolve, reject) => {
-             synchronousSearch(resolve, reject, mongoclient, url, queryobject, searchHistory);
-           });
+     // query db
+     return new Promise( (resolve, reject) => {
+       synchronousSearch(resolve, reject, mongoclient, url, queryobject, searchHistory);
+     });
   },
   searchInMarkerList: function(mongoclient, url, searchkey){
     return new Promise( (resolve, reject) => {
