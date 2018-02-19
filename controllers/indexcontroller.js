@@ -9,8 +9,11 @@ module.exports = {
   },
   SearchHistoryForMap: function (req, res, url, vm){
     Repository.searchHistoryForMap(MongoClient, url, vm).then( (items) => {
-    res.send(items);
+     Repository.logSearchTermAndResults(MongoClient, url, items).then( (loggeditems) => {
+       res.send(loggeditems);
+     });
   });
+
   },
   NameOfMarkerList: function(req, res, url, term){
     Repository.searchInMarkerList(MongoClient, url, term).then( (items) => {

@@ -35,6 +35,10 @@
               title: 'Hello World!'
             });
 
+    if (isNaN(parseFloat(item.Latitude)) || isNaN(parseFloat(item.Longitude)) ){
+      alert('This data point does not have location assigned to it. Sorry !');
+    }
+    
     markers.push(marker);
     marker.setMap(map);
 
@@ -88,7 +92,7 @@
           type: 'POST',
           success: function (data){
             removemarkers();
-            data.items.forEach( (el) =>{
+            data.forEach( (el) =>{
               addmarkers(el);
             });
           }
