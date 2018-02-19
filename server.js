@@ -1,11 +1,8 @@
 const Express = require('express');
 const BodyParser = require('body-parser');
 const NodeMailer = require('nodemailer');
-const MongoClient = require('mongodb').MongoClient;
-const Promise = require('promise');
 const Assert = require('assert');
-const Repository = require('./repository');
-
+const Controller = require('./controllers/indexcontroller')
 // Connection URL
 const url = 'mongodb://localhost:27017';
 
@@ -17,44 +14,30 @@ app.use(BodyParser.urlencoded({ extended: true })); // for parsing application/x
 /*---------------Page & Form Routing--------------------*/
 
 app.get('/', (req,res)=>{
-  res.render('index');
+  Controller.HomePage(req,res);
+  //res.render('index');
 });
 
 app.post('/searchHistoryForMap', (req,res) =>{
-  let vm = req.body;
-  Repository.searchHistoryForMap(MongoClient, url, vm).then( (items) => {
-  res.send(items);
-});
+  Controller.SearchHistoryForMap(req, res, url, req.body);
 });
 
 /*---------------Select2 Requests--------------------*/
 
 app.post('/NameOfMarkerList', (req,res) =>{
-  let term = req.body.term;
-  Repository.searchInMarkerList(MongoClient, url, term).then( (items) => {
-  res.send(items);
-});
+    Controller.NameOfMarkerList(req, res, url, req.body.term);
 });
 
 app.post('/CountyList', (req,res) =>{
-  let term = req.body.term;
-  Repository.searchCountyList(MongoClient, url, term).then( (items) => {
-  res.send(items);
-});
+  Controller.CountyList(req, res, url, req.body.term);
 });
 
 app.post('/CategoryList', (req,res) =>{
-  let term = req.body.term;
-  Repository.searchCategoryList(MongoClient, url, term).then( (items) => {
-  res.send(items);
-});
+  Controller.CategoryList(req, res, url, req.body.term);
 });
 
 app.post('/LocationDescriptionList', (req,res) =>{
-  let term = req.body.term;
-  Repository.searchLocationDescriptionList(MongoClient, url, term).then( (items) => {
-  res.send(items);
-});
+  Controller.LocationDescriptionList(req, res, url, req.body.term);
 });
 
 
