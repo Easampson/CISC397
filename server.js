@@ -15,7 +15,6 @@ app.use(BodyParser.urlencoded({ extended: true })); // for parsing application/x
 
 app.get('/', (req,res)=>{
   Controller.HomePage(req,res);
-  //res.render('index');
 });
 
 app.post('/searchHistoryForMap', (req,res) =>{
