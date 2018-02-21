@@ -1,21 +1,27 @@
 const Models = require('./models/indexmodel');
 
 module.exports = {
+  DoesUserExist: function (mongoclient, url, usrcred){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, usrcred, searchForUser);
+    });
+  },
+  RegisterUser: function (mongoclient, url, usrcred){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, usrcred, registerUser);
+    });
+  },
+  UserTagLists: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, usertaglists);
+    });
+  },
   searchHistoryForMap: function (mongoclient, url, vm){
 
-     // build new query object from vm
-     let queryobject = new Models.SearchFormModel();
-
-     if (vm.Historical_Marker_Id != '') {queryobject.Historical_Marker_Id = vm.Historical_Marker_Id}
-     if (vm.Category != '') {queryobject.Category = vm.Category}
-     if (vm.County != '') {queryobject.County = vm.County}
-     if (vm.Location_Description != '') {queryobject.Location_Description = vm.Location_Description}
-
-     // query db
+     let queryobject = new Models.SearchFormModel(vm);
      return new Promise( (resolve, reject) => {
        synchronousSearch( resolve, reject, mongoclient, url, queryobject, searchHistory);
      });
-
   },
   logSearchTermAndResults: function(mongoclient, url, results){
     return new Promise( (resolve, reject) => {
@@ -50,20 +56,57 @@ module.exports = {
 // removes code that is repeated throughout above
 function synchronousSearch(resolve, reject, mc, url, key, select2search){
 
-       mc.connect(url)
-       .then( (client) => {
-            if ( key != null){
-              select2search(resolve, reject, client, key);
-            }
-          }).catch( (err) =>{console.log(err)});
+   mc.connect(url)
+   .then( (client) => {
+        if ( key != null){
+          select2search(resolve, reject, client, key);
+        }
+      }).catch( (err) =>{console.log(err)});
+}
+
+function registerUser (resolve, reject, client, key){
+  var db = client.db('PHF');
+
+  db.collection('users').insert(new Models.RegisterUserModel(key))
+      .then( (list) => {
+          resolve('1');
+      }, (err)=>{
+          resolve('0');
+      });
+}
+
+function searchForUser(resolve, reject, client, key){
+
+  var db = client.db('PHF');
+  db.collection('users').find(key)
+      .toArray( (err, list) => {
+          (list.length > 0 ) ? resolve('1'):resolve('0');
+      });
+}
+
+function usertaglists(resolve, reject, client, vm){
+  var db = client.db('PHF');
+  var queryobject = new Models.UserTagListsModel(vm);
+
+  if ( queryobject.Term != null && queryobject.Term != '' ){
+  db.collection('usertags').find()
+      .toArray( (err, list) => {
+          let results = {};
+          results.items = [];
+          console.log("Query Mongodb successfull");
+
+          list.forEach( (el, i) => {
+              results.items.push(new Model.Select2Model(el));
+          });
+          client.close();
+          resolve(results);
+      });
+    }
+
 }
 
 function searchHistory(resolve, reject, client, searchkey){
-  let results = new Models.SearchHistoryResultsModel();
-  results.items = [];
-  results.log = {};
-  results.log.searchTerms = searchkey;
-  results.log.logresults = [];
+  let results = new Models.SearchHistoryResultsModel(searchkey);
 
   // queries for records with sub string searchkey
   // duplicates are then removed by searching the index
@@ -76,9 +119,10 @@ function searchHistory(resolve, reject, client, searchkey){
               let i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
               if (i === i2){
                 results.items.push(el);
-                results.log.logresults.push(el.Historical_Marker_Id);
+                results.log.searchResults.push(el.Historical_Marker_Id);
               }
             });
+            client.close();
            resolve(results);
           }
           client.close();

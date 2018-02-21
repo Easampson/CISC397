@@ -15,7 +15,7 @@ db = client.PHF     # PA History Finder Database
 
 # Function to read file called filename
 # ensure the file is in current working directory or simply pass the full file path
-def readFile(filename):
+def readFile(filename, encoding = "ISO-8859-1"):
     linenum = 0
 
     with open(filename) as f:

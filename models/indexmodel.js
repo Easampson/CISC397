@@ -2,18 +2,29 @@
 
 module.exports = {
 
-  // search form model
-  SearchFormModel : function(){
-      //Historical_Marker_Id
-      //Category
-      //County
-      //Location_Description
+  SearchFormModel : function(vm){
+      if (vm.Historical_Marker_Id != '') {this.Historical_Marker_Id = vm.Historical_Marker_Id}
+      if (vm.Category != '') {this.Category = vm.Category}
+      if (vm.County != '') {this.County = vm.County}
+      if (vm.Location_Description != '') {this.Location_Description = vm.Location_Description}
   },
-  SearchHistoryResultsModel: function(){
-    //items: { document records from MongoDB PHF//markers},
-    //log: {
-    //      searchTerm: {SearchFormModel},
-    //      searchResults: ['Historical_Marker_Id',, 'Historical_Marker_Id',...]
-    //     }
+  SearchHistoryResultsModel: function(st){
+    this.items = [];
+    this.log = {};
+    this.log.searchTerm = st;
+    this.log.searchResults = [];
+  },
+  RegisterUserModel: function(usrcred){
+    this.Username = usrcred.Username;
+    this.Password = usrcred.Password;
+    this.SessionID = '';
+  },
+  UserTagListsModel: function (vm){
+    this.Username = vm.Username;
+    this.Term = vm.term;
+  },
+  Select2Model: function(obj){
+    this.id = obj.id;
+    this.text = obj.text;
   }
 }
