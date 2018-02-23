@@ -23,8 +23,8 @@ module.exports = {
     this.Username = vm.Username;
     this.Term = vm.term;
   },
-  Select2Model: function(obj){
-    this.id = obj.id;
-    this.text = obj.text;
+  Select2ModelFromUserTags: function(obj){
+    this.id = obj[0];
+    this.text = obj[0];
   }
 }

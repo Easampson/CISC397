@@ -47,6 +47,12 @@ module.exports = {
     res.render('index');
   },
   SearchHistoryForMap: function (req, res, url, vm){
+
+    if (req.body.Username == null || req.body.Username == ""){
+      res.send('0');
+      return;
+    }
+
     Repository.searchHistoryForMap(MongoClient, url, vm).then( (items) => {
      Repository.logSearchTermAndResults(MongoClient, url, items).then( (loggeditems) => {
        res.send(loggeditems);

@@ -18,7 +18,7 @@ module.exports = {
   },
   searchHistoryForMap: function (mongoclient, url, vm){
 
-     let queryobject = new Models.SearchFormModel(vm);
+     var queryobject = new Models.SearchFormModel(vm);
      return new Promise( (resolve, reject) => {
        synchronousSearch( resolve, reject, mongoclient, url, queryobject, searchHistory);
      });
@@ -91,13 +91,14 @@ function usertaglists(resolve, reject, client, vm){
   if ( queryobject.Term != null && queryobject.Term != '' ){
   db.collection('usertags').find()
       .toArray( (err, list) => {
-          let results = {};
+          var results = {};
           results.items = [];
-          console.log("Query Mongodb successfull");
 
-          list.forEach( (el, i) => {
-              results.items.push(new Model.Select2Model(el));
+          if (list != null && list != undefined){
+          list.lists.forEach( (el, i) => {
+              results.items.push(new Model.Select2ModelFromUserTags(el));
           });
+        }
           client.close();
           resolve(results);
       });
@@ -106,7 +107,7 @@ function usertaglists(resolve, reject, client, vm){
 }
 
 function searchHistory(resolve, reject, client, searchkey){
-  let results = new Models.SearchHistoryResultsModel(searchkey);
+  var results = new Models.SearchHistoryResultsModel(searchkey);
 
   // queries for records with sub string searchkey
   // duplicates are then removed by searching the index
@@ -116,7 +117,7 @@ function searchHistory(resolve, reject, client, searchkey){
            if (list != null){
 
             list.forEach( (el, i) => {
-              let i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
+              var i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
               if (i === i2){
                 results.items.push(el);
                 results.log.searchResults.push(el.Historical_Marker_Id);
@@ -131,7 +132,7 @@ function searchHistory(resolve, reject, client, searchkey){
 
 function logSearchResults(resolve, reject, client, results){
 
-    let db = client.db('PHF');
+    var db = client.db('PHF');
       db.collection('searchlogs').insert(results.log, { w: 1 }).then( (err, doc) =>{
         client.close();
         resolve(results.items);
@@ -141,7 +142,7 @@ function logSearchResults(resolve, reject, client, results){
 }
 
 function searchMarker(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -153,7 +154,7 @@ function searchMarker(resolve, reject, client, searchkey){
            if (list != null){
 
             list.forEach( (el, i) => {
-              let i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
+              var i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
                if (i === i2){
                  results.items.push({ id: el.Historical_Marker_Id, text: el.Name_of_the_Marker+'-'+el.Dedicated_Year });
                }
@@ -168,7 +169,7 @@ function searchMarker(resolve, reject, client, searchkey){
 }
 
 function searchCounty(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -179,7 +180,7 @@ function searchCounty(resolve, reject, client, searchkey){
 
            if (list != null){
             list = list.filter( (el, i) => {
-              let i2 = list.findIndex(e => e.County === el.County);
+              var i2 = list.findIndex(e => e.County === el.County);
                if (i === i2){
                  results.items.push({ id: el.County, text: el.County });
                }
@@ -195,7 +196,7 @@ function searchCounty(resolve, reject, client, searchkey){
 
 
 function searchCategory(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -205,7 +206,7 @@ function searchCategory(resolve, reject, client, searchkey){
          .toArray( (err, list) => {
            if (list != null){
             list = list.filter( (el, i) => {
-              let i2 = list.findIndex(e => e.Category === el.Category);
+              var i2 = list.findIndex(e => e.Category === el.Category);
                if (i === i2) {
                  results.items.push({ id: el.Category, text: el.Category });
                }
@@ -220,7 +221,7 @@ function searchCategory(resolve, reject, client, searchkey){
 }
 
 function searchLocationDescription(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -230,7 +231,7 @@ function searchLocationDescription(resolve, reject, client, searchkey){
                .toArray( (err, list) => {
                  if (list != null){
                   list = list.filter( (el, i) => {
-                    let i2 = list.findIndex(e => e.Location_Description === el.Location_Description);
+                    var i2 = list.findIndex(e => e.Location_Description === el.Location_Description);
                      if (i === i2) {
                        results.items.push({ id: el.Location_Description, text: el.Location_Description });
                      }

@@ -18,7 +18,7 @@
               <select class="select2" id="usertaglists" url="/usertaglists">
               </select>
           </div>
-
+          <button type="button" class="btn btn-success">Add</button>
       </form>
       </div>
       <div class="modal-footer">
@@ -35,15 +35,15 @@
 <script>
 
   // Script to open and close sidebar------------------------------------
-  function w3_open() {
-      document.getElementById("mySidebar").style.display = "block";
-      document.getElementById("myOverlay").style.display = "block";
-  }
-
-  function w3_close() {
-      document.getElementById("mySidebar").style.display = "none";
-      document.getElementById("myOverlay").style.display = "none";
-  }
+  // function w3_open() {
+  //     document.getElementById("mySidebar").style.display = "block";
+  //     document.getElementById("myOverlay").style.display = "block";
+  // }
+  //
+  // function w3_close() {
+  //     document.getElementById("mySidebar").style.display = "none";
+  //     document.getElementById("myOverlay").style.display = "none";
+  // }
 
   // Google Maps JS API------------------------------------
 
@@ -122,18 +122,24 @@
             Historical_Marker_Id:hid,
             Category: cat,
             County: cty,
-            Location_Description: ld
+            Location_Description: ld,
+            Username: getUsername()
           },
           type: 'POST',
           success: function (data){
+            if ( data != '0'){
             removemarkers();
             data.forEach( (el) =>{
               addmarkers(el);
             });
           }
+            else{
+              alert("Sorry! You need to be logged in to search for information");
+              window.location.assign("http://localhost:3000/login");
+            }
+          }
   });
 }
-
   // select2js------------------------------------
   // In your Javascript (external .js resource or <script> tag)
 $(document).ready(function() {
@@ -170,9 +176,16 @@ $(document).ready(function() {
 }); // end of document ready function
 
 function getUsername(){
-  return document.cookie.split(";")[1].split("=")[1];
+  if (document.cookie == ""){
+    return '';
+  }
+  return document.cookie.split("=")[1];
 }
-  </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGMa3dyfjmI9J09kMVCEo3ad7tCUdEXpQ&callback=initMap"
-     async defer></script>
+function logout(){
+  document.cookie = "Username=";
+  window.location.assign("http://localhost:3000/login");
+}
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGMa3dyfjmI9J09kMVCEo3ad7tCUdEXpQ&callback=initMap" async defer></script>

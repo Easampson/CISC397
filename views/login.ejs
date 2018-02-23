@@ -87,13 +87,11 @@ function submitLogin(){
         Password: pass
       },
       success: function(data){
-
-        if (data.SessionID != '0' && data.SessionID != null){ // login success
-          document.cookie = "SessionID="+data.SessionID;
+        if (data.Username != '0' && data.Username != null){ // login success
           document.cookie = "Username="+data.Username;
           window.location.assign("http://localhost:3000/");
         }else {
-          alert("failure");
+          alert("Sorry! Authentication Failed!");
         }
 
       }
