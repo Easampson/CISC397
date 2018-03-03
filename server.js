@@ -3,18 +3,23 @@ const BodyParser = require('body-parser');
 const NodeMailer = require('nodemailer');
 const Assert = require('assert');
 const Controller = require('./controllers/indexcontroller');
+var CookieParser = require('cookie-parser')
 // Connection URL
 const url = 'mongodb://localhost:27017';
 
 var app = Express();
 app.set('view engine', 'ejs');
+app.use(CookieParser());
 app.use(BodyParser.json()); // for parsing application/json
 app.use(BodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 /*---------------Page & Form Routing--------------------*/
 // need to add session cookie to see if user is authenticated
-
 app.get('/', (req,res)=>{
+  Controller.HomePage(req,res);
+});
+
+app.post('/', (req,res)=>{
   Controller.HomePage(req,res);
 });
 
@@ -38,11 +43,21 @@ app.post('/searchHistoryForMap', (req,res) =>{
   Controller.SearchHistoryForMap(req, res, url, req.body);
 });
 
-
 app.post('/usertaglists', (req,res) =>{
   Controller.UserTagLists(req, res, url, req.body);
 });
 
+app.post('/retrievelist', (req,res) =>{
+  Controller.RetrieveUserTagList(req, res, url, req.body);
+});
+
+app.post('/addnewuserlist', (req,res) =>{
+  Controller.AddNewUserTagList(req, res, url, req.body);
+});
+
+app.post('/addmarkertolist', (req,res) =>{
+  Controller.AddMarkerToList(req, res, url, req.body);
+});
 /*---------------Select2 Requests--------------------*/
 
 app.post('/NameOfMarkerList', (req,res) =>{

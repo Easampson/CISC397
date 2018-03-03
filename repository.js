@@ -16,6 +16,21 @@ module.exports = {
       synchronousSearch( resolve, reject, mongoclient, url, vm, usertaglists);
     });
   },
+  RetrieveUserTagList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, retrievetaglist);
+    });
+  },
+  AddNewUserTagList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, newusertaglist);
+    });
+  },
+  AddMarkerToList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, addmarkertolist);
+    });
+  },
   searchHistoryForMap: function (mongoclient, url, vm){
 
      var queryobject = new Models.SearchFormModel(vm);
@@ -54,12 +69,12 @@ module.exports = {
 // function to syncrhonize select2 searching by wrapping promise-then template
 // on connect
 // removes code that is repeated throughout above
-function synchronousSearch(resolve, reject, mc, url, key, select2search){
+function synchronousSearch(resolve, reject, mc, url, key, function_name){
 
    mc.connect(url)
    .then( (client) => {
         if ( key != null){
-          select2search(resolve, reject, client, key);
+          function_name(resolve, reject, client, key);
         }
       }).catch( (err) =>{console.log(err)});
 }
@@ -86,28 +101,64 @@ function searchForUser(resolve, reject, client, key){
 
 function usertaglists(resolve, reject, client, vm){
   var db = client.db('PHF');
-  var queryobject = new Models.UserTagListsModel(vm);
-
-  if ( queryobject.Term != null && queryobject.Term != '' ){
-  db.collection('usertags').find()
+  db.collection('usertags').find({ user:vm.usrname})
       .toArray( (err, list) => {
           var results = {};
           results.items = [];
-
-          if (list != null && list != undefined){
-          list.lists.forEach( (el, i) => {
-              results.items.push(new Model.Select2ModelFromUserTags(el));
-          });
-        }
+          if (list.length > 0){
+            list[0].lists.forEach( (el, i) => {
+                results.items.push(new Models.Select2ModelFromUserTagLists(el.name));
+            });
+          }
           client.close();
           resolve(results);
       });
-    }
+}
+
+function retrievetaglist(resolve, reject, client, vm){
+  var db = client.db('PHF');
+  db.collection('usertags').find({ user:vm.usrname, 'lists.name': vm.listname})
+      .toArray( (err, list) => {
+          var results = {};
+          results.items = [];
+          if (list.length > 0){
+            list[0].lists.forEach( (el, i) => {
+              el.markers.forEach( (m, i) => {
+                console.log(m);
+                results.items.push(new Models.ModelFromUserTagList(m));
+              });
+            });
+          }
+          client.close();
+          resolve(results);
+      });
+}
+function newusertaglist(resolve, reject, client, key){
+  var db = client.db('PHF');
+
+  db.collection('usertags').update({user: key.User}, {'$push': { lists: { name:key.NameOfList, markers: []} }}, {upsert:true} )
+  .then( (result) =>{
+    console.log(result);
+    resolve('1');
+  },
+    (err) => {
+      console.log(err);
+      resolve(err);
+    });
+
+}
+function addmarkertolist(resolve, reject, client, key){
+  var db = client.db('PHF');
+  console.log(key);
+  db.collection('usertags').update({user: key.User, 'lists.name': key.ListName}, {'$push': { 'lists.$.markers': { Title:key.Title, Description:key.Description } }} )
+  .then( (result) =>{
+    resolve('1');
+  });
 
 }
 
 function searchHistory(resolve, reject, client, searchkey){
-  var results = new Models.SearchHistoryResultsModel(searchkey);
+  var results = new Models.SearchHistoryResultsModel(new Models.Log(searchkey));
 
   // queries for records with sub string searchkey
   // duplicates are then removed by searching the index

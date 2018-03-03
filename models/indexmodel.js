@@ -8,11 +8,13 @@ module.exports = {
       if (vm.County != '') {this.County = vm.County}
       if (vm.Location_Description != '') {this.Location_Description = vm.Location_Description}
   },
-  SearchHistoryResultsModel: function(st){
+  SearchHistoryResultsModel: function(_log){
     this.items = [];
-    this.log = {};
-    this.log.searchTerm = st;
-    this.log.searchResults = [];
+    this.log = _log;
+  },
+  Log: function (st){
+    this.searchTerm = st;
+    this.searchResults = [];
   },
   RegisterUserModel: function(usrcred){
     this.Username = usrcred.Username;
@@ -20,11 +22,23 @@ module.exports = {
     this.SessionID = '';
   },
   UserTagListsModel: function (vm){
-    this.Username = vm.Username;
+    this.user = vm.Username;
     this.Term = vm.term;
   },
   Select2ModelFromUserTags: function(obj){
     this.id = obj[0];
     this.text = obj[0];
+  },
+  Select2ModelFromUserTagLists: function(listname){
+    this.id = listname;
+    this.text = listname;
+  },
+  ModelFromUserTagList: function(vm){
+    this.Title = vm.Title;
+    this.Description = vm.Description;
+  },
+  TagMarkerModel: function (vm){
+    this.Title = vm.Title;
+    this.Description = vm.Description;
   }
 }

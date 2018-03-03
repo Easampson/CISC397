@@ -11,7 +11,7 @@ module.exports = {
   LoginSubmit:function (req, res, url){
     Repository.DoesUserExist(MongoClient, url, req.body).then( (result) =>{
       console.log(req.body.Username);
-        // send back cookie
+        // send back success or failure status to add cookie on clientside
         if (result != '0'){
           res.send({
             Username: req.body.Username
@@ -43,7 +43,25 @@ module.exports = {
       res.send(items);
     });
   },
+  RetrieveUserTagList: function(req, res, url, key){
+    Repository.RetrieveUserTagList(MongoClient, url, key).then( (items) => {
+      res.send(items);
+    });
+  },
+  AddNewUserTagList:function (req, res, url, key){
+    Repository.AddNewUserTagList(MongoClient, url, key).then( (items) => {
+      res.send(items);
+    });
+  },
+  AddMarkerToList:function (req, res, url, key){
+    Repository.AddMarkerToList(MongoClient, url, key).then( (item) => {
+      res.send(item);
+    });
+  },
   HomePage: function(req, res){
+    if (req.cookies.Username == '' || req.cookies.Username == null){
+      res.render('login');
+    }
     res.render('index');
   },
   SearchHistoryForMap: function (req, res, url, vm){

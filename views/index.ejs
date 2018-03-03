@@ -11,10 +11,10 @@
   <div class="col-md-4 col-sm-4 col-lg-4">
 
     <div class="pull-right">
+      <p id="usr"></p>
      <button class="btn btn-success" type="button" onclick="logout()">Logout</button>
     </div>
     <br>
-
 
     <!-- Header -->
     <div class="w3-container" id="showcase">
@@ -75,20 +75,33 @@
     <br>
 </div>
   </div><!-- End of Row-->
-
+ <hr>
 <!-- Tagging -->
 <div class="row">
   <div class="col-md-12 col-sm-12 col-lg-12">
+
     <div class="w3-container" style="margin-top:80px" id="showcase">
-      <h1 class="w3-jumbo"><b>Your Tags</b></h1>
-      <div class="col-md-12 col-sm-12 col-lg-12">
-        <select class="select2" id="usertaglists" url="/usertaglists">
+      <h1 class="w3-jumbo"><b>Tag Lists</b></h1>
+      <div class="row">
+      <div class="col-md-2 col-sm-2 col-lg-2">
+        <select class="select2 taglists" id="usertaglists" url="/usertaglists" minimumResultsForSearch='Infinity' placeholder="Choose List">
         </select>
+        <hr style="width:50px;border:5px solid red" class="w3-round"/>
       </div>
-      <hr style="width:50px;border:5px solid red" class="w3-round">
+      <div class="col-md-10 col-sm-10 col-lg-10">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addnewtaglistModal">Add +</button>
+        <button type="button" class="btn btn-success" onclick="return refreshTagListView();">Refresh List</button>
+
+         <div class="jumbotron" id="usertaglistview">
+           <h3 >...Select a list to show markers that you've tagged...</h3>
+       </div>
+      </div>
+    </div>
+
   </div>
+
   </div>
-</div>
+</div> <!-- End of tagging row -->
 
 
 <!-- End page content -->

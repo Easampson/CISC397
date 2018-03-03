@@ -1,7 +1,7 @@
 <!-- Modal to add an item shown on the map to a tagged list -->
 <!-- Trigger the modal with a button -->
 
-<!-- Modal -->
+<!-- Add Marker to a Taglist Modal -->
 <div id="tagItemModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
 
@@ -14,11 +14,38 @@
       <div class="modal-body">
         <form>
           <div class="form-group">
-            <p class="control-label" for="usertaglists">Choose a list to add the item to:</p>
-              <select class="select2" id="usertaglists" url="/usertaglists">
+            <p class="control-label" for="addtousertaglist">Choose a list to add the item to:</p>
+              <select class="select2" id="addtousertaglist" url="/usertaglists" minimumResultsForSearch='Infinity' placeholder="Choose List">
               </select>
           </div>
-          <button type="button" class="btn btn-success">Add</button>
+          <button type="button" class="btn btn-success" onclick="addmarkertolist()">Add</button>
+      </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add New Taglist Modal -->
+<div id="addnewtaglistModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Add New Tag List</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <span><i>(Page will refresh after adding)</i></span>
+        <form>
+          <div class="form-group">
+              <input type="text" class="form-control newlistname" placeholder="Enter name of new list" />
+          </div>
+          <button type="button" class="btn btn-success" onclick="addNewList()">Add</button>
       </form>
       </div>
       <div class="modal-footer">
@@ -50,6 +77,7 @@
   var map;
   var markers = [];
   var infowindows = [];
+  var selectedmarker;
 
   function initMap() {
     if (document.getElementById('map')){
@@ -65,15 +93,15 @@
   function addmarkers(item){
     var marker = new google.maps.Marker({
               position: {lat:parseFloat(item.Latitude),lng:parseFloat(item.Longitude)},
-              map: map,
-              title: 'Hello World!'
+              map: map
             });
 
     if (isNaN(parseFloat(item.Latitude)) || isNaN(parseFloat(item.Longitude)) ){
-      alert('One or more data points do not have location assigned to it. Sorry !');
+      //alert('One or more data points do not have location assigned to it. Sorry !');
+      // render results as text instead.
     }
 
-    markers.push(marker);
+    markers.push({ Title:item.Name_of_the_Marker, Description: item.Marker_Description,Marker:marker});
     marker.setMap(map);
 
 
@@ -93,6 +121,8 @@
 
     marker.addListener('click', function() {
       infowindow.open(map, marker);
+      selectedmarker = markers.filter(m => {return m.Marker === marker;})[0];
+      console.log(selectedmarker);
     });
 
     infowindows.push(infowindow);
@@ -101,7 +131,7 @@
 
   function removemarkers(){
     for (var i = 0; i < markers.length; i++) {
-     markers[i].setMap(null);
+     markers[i].Marker.setMap(null);
    }
     markers = [];
     infowindows = [];
@@ -140,40 +170,131 @@
           }
   });
 }
+  // adding new lists and tags------------------------------------
+
+  function addNewList(){
+
+    var nameoflist = $('.newlistname').val();
+
+    $.ajax({
+      url: '/addnewuserlist',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+          NameOfList: nameoflist,
+          User: getUsername()
+      },
+      success: function(data){
+        $('#addnewtaglistModal').modal('toggle');
+        window.location.assign("http://localhost:3000/");
+      }
+    });
+
+  }
+
+function addmarkertolist(){
+  var _listname = $('#addtousertaglist').val();
+if (_listname != null){
+  $.ajax({
+    url: '/addmarkertolist',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+        Title: selectedmarker.Title,
+        Description: selectedmarker.Description,
+        User: getUsername(),
+        ListName:_listname
+    },
+    success: function(){
+      $('#tagItemModal').modal('toggle');
+    }
+  });
+}
+}
+
   // select2js------------------------------------
   // In your Javascript (external .js resource or <script> tag)
 $(document).ready(function() {
 
+    // assign username to usergreeting at top of Page
+    if (document.getElementById('usr')){
+      document.getElementById('usr').innerHTML = "Welcome @" + getUsername()+ '!';
+    }
+
+
     $('.select2').each(function(){
 
           let url = this.getAttribute("url");
+          let enablesearch = this.getAttribute('minimumResultsForSearch') || 0;
+          let plcholder = this.getAttribute('placeholder') || 'Begin typing...';
+
 
           $(this).select2({
-            placeholder:'Begin typing...',
+            placeholder: plcholder,
             allowClear: true,
             width:"80%",
+            minimumResultsForSearch: enablesearch,
             ajax: {
               delay: 250,
               url: url,
               type:'POST',
               dataType: 'json',
               data: function (params) {
-                   return {
-                     term: params.term,
-                     usrname:getUsername()
-                   };
-                 },
-                 processResults: function (data) {
-                      // Tranforms the top-level key of the response object from 'items' to 'results'
-                      return {
-                        results: data.items
-                      };
-                }
+                 return {
+                   term: params.term,
+                   usrname:getUsername()
+                 };
+              },
+              processResults: function (data) {
+                  // Tranforms the top-level key of the response object from 'items' to 'results'
+                  return {
+                    results: data.items
+                  };
+              }
             }
           });
     });
 
+    $('.select2.taglists').on('select2:select', (e)=>{
+      refreshTagListView(e);
+    });
+
 }); // end of document ready function
+
+function refreshTagListView(e){
+  var data;
+  if (e === undefined){
+    data = {id:$('#usertaglists').val()};
+  }else{
+    data = e.params.data; // {id:<val>,text:<val>}
+  }
+
+  $.ajax({
+    url: '/retrievelist',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      usrname:getUsername(),
+      listname: data.id
+    },
+    success: function (data){
+      // render text results in template
+      var results = "";
+      data.items.forEach( (el, i)=>{
+        var content = '<div class="row">'+
+                      '<div class="col-md-12 col-sm-12 col-lg-12">'+
+                      '<h3>'+el.Title+'</h3>'+
+                      '<p>'+el.Description+'</p>'+
+                      '</div>'+
+                      '</div>'+
+                      '<hr/>';
+        results += content;
+      });
+
+      $('#usertaglistview').html(results);
+    }
+  });
+}
 
 function getUsername(){
   if (document.cookie == ""){
