@@ -54,9 +54,15 @@ app.post('/retrievelist', (req,res) =>{
 app.post('/addnewuserlist', (req,res) =>{
   Controller.AddNewUserTagList(req, res, url, req.body);
 });
+app.post('/removeuserlist', (req,res) =>{
+  Controller.RemoveUserTagList(req, res, url, req.body);
+});
 
 app.post('/addmarkertolist', (req,res) =>{
   Controller.AddMarkerToList(req, res, url, req.body);
+});
+app.post('/removemarkerfromlist', (req,res) =>{
+  Controller.RemoveMarkerFromList(req, res, url, req.body);
 });
 /*---------------Select2 Requests--------------------*/
 

@@ -26,9 +26,19 @@ module.exports = {
       synchronousSearch( resolve, reject, mongoclient, url, vm, newusertaglist);
     });
   },
+  RemoveUserTagList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, removeusertaglist);
+    });
+  },
   AddMarkerToList: function (mongoclient, url, vm){
     return new Promise( (resolve, reject) => {
       synchronousSearch( resolve, reject, mongoclient, url, vm, addmarkertolist);
+    });
+  },
+  RemoveMarkerFromList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, removemarkerfromlist);
     });
   },
   searchHistoryForMap: function (mongoclient, url, vm){
@@ -123,10 +133,12 @@ function retrievetaglist(resolve, reject, client, vm){
           results.items = [];
           if (list.length > 0){
             list[0].lists.forEach( (el, i) => {
-              el.markers.forEach( (m, i) => {
-                console.log(m);
-                results.items.push(new Models.ModelFromUserTagList(m));
-              });
+              if (el.name == vm.listname){
+                results.ListName = el.name;
+                el.markers.forEach( (m, i) => {
+                  results.items.push(new Models.ModelFromUserTagList(m));
+                });
+            }
             });
           }
           client.close();
@@ -135,24 +147,44 @@ function retrievetaglist(resolve, reject, client, vm){
 }
 function newusertaglist(resolve, reject, client, key){
   var db = client.db('PHF');
-
   db.collection('usertags').update({user: key.User}, {'$push': { lists: { name:key.NameOfList, markers: []} }}, {upsert:true} )
   .then( (result) =>{
-    console.log(result);
     resolve('1');
   },
     (err) => {
-      console.log(err);
       resolve(err);
+    });
+
+}
+function removeusertaglist(resolve, reject, client, key){
+  var db = client.db('PHF');
+  db.collection('usertags').update({user: key.User}, {'$pull': { lists: { name:key.NameOfList}}} )
+  .then( (result) =>{
+    resolve('1');
+  },
+    (err) => {
+      resolve('0');
     });
 
 }
 function addmarkertolist(resolve, reject, client, key){
   var db = client.db('PHF');
-  console.log(key);
-  db.collection('usertags').update({user: key.User, 'lists.name': key.ListName}, {'$push': { 'lists.$.markers': { Title:key.Title, Description:key.Description } }} )
+  db.collection('usertags').update({user: key.User, 'lists.name': key.ListName}, {'$push': { 'lists.$.markers': { ListName:key.ListName, Title:key.Title, Description:key.Description } }} )
   .then( (result) =>{
     resolve('1');
+  });
+
+}
+
+function removemarkerfromlist(resolve, reject, client, key){
+  var db = client.db('PHF');
+  console.log(key);
+  db.collection('usertags').update({user: key.User, 'lists.name': key.NameOfList}, {'$pull': { 'lists.$.markers': { ListName: key.NameOfList, Title:key.ItemTitle } } } )
+  .then( (result) =>{
+    resolve('1');
+  },
+  (err) => {
+    resolve('0');
   });
 
 }

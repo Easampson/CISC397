@@ -212,6 +212,26 @@ if (_listname != null){
 }
 }
 
+
+// removing item from a list --------------------------------
+function removeitemfromlist(){
+
+  let listname = $('#tagitemremovebutton').attr('item-name');
+  if (_listname != null){
+    $.ajax({
+      url: '/removemarkerfromlist',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+          User: getUsername(),
+          ListName:_listname
+      },
+      success: function(){
+        $('#tagItemModal').modal('toggle');
+      }
+    });
+  }
+}
   // select2js------------------------------------
   // In your Javascript (external .js resource or <script> tag)
 $(document).ready(function() {
@@ -284,6 +304,7 @@ function refreshTagListView(e){
         var content = '<div class="row">'+
                       '<div class="col-md-12 col-sm-12 col-lg-12">'+
                       '<h3>'+el.Title+'</h3>'+
+                      '<div class="float-right"><button class="btn btn-danger" id="tagitemremovebutton" item-list="'+data.ListName+'" item-name="'+el.Title+'" onclick="removeitemfromlist()">Delete</button></div><br>'+
                       '<p>'+el.Description+'</p>'+
                       '</div>'+
                       '</div>'+
@@ -291,7 +312,71 @@ function refreshTagListView(e){
         results += content;
       });
 
+      if (data.items.length == 0){
+        results = '<div class="row">'+
+                      '<div class="col-md-12 col-sm-12 col-lg-12">'+
+                      '<h3> No Tags Present</h3>'+
+                      '</div>'+
+                      '</div>'+
+                      '<hr/>';
+      }
+
       $('#usertaglistview').html(results);
+    }
+  });
+}
+
+function removeTagList(){
+  var data = {id:$('#usertaglists').val()};
+  if (data){
+      $.ajax({
+        url: '/removeuserlist',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          User:getUsername(),
+          NameOfList: data.id
+        },
+        success: function (data){
+          // render text results in template
+          if (data == '0'){
+            alert('Error in deleting list!');
+          }
+
+          var results = '<div class="row">'+
+                        '<div class="col-md-12 col-sm-12 col-lg-12">'+
+                        '<h3> ...Select list to show tagged markers...</h3>'+
+                        '</div>'+
+                        '</div>'+
+                        '<hr/>';
+
+          $('#usertaglistview').html(results);
+          $('#usertaglists').val(null).trigger('change');
+        }
+      });
+  }
+}
+
+function removeitemfromlist(){
+
+  var itemtitle = $('#tagitemremovebutton').attr('item-name');
+  var itemlist = $('#tagitemremovebutton').attr('item-list');
+
+  $.ajax({
+    url: '/removemarkerfromlist',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      User:getUsername(),
+      NameOfList: itemlist,
+      ItemTitle: itemtitle
+    },
+    success: function (data){
+      if (data == '0'){
+        alert('Error in deleting item from list!');
+      }
+
+      refreshTagListView();
     }
   });
 }

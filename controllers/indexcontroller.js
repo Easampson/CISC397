@@ -53,8 +53,18 @@ module.exports = {
       res.send(items);
     });
   },
+  RemoveUserTagList:function (req, res, url, key){
+    Repository.RemoveUserTagList(MongoClient, url, key).then( (items) => {
+      res.send(items);
+    });
+  },
   AddMarkerToList:function (req, res, url, key){
     Repository.AddMarkerToList(MongoClient, url, key).then( (item) => {
+      res.send(item);
+    });
+  },
+  RemoveMarkerFromList:function (req, res, url, key){
+    Repository.RemoveMarkerFromList(MongoClient, url, key).then( (item) => {
       res.send(item);
     });
   },
