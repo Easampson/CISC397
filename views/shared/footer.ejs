@@ -99,6 +99,7 @@
     if (isNaN(parseFloat(item.Latitude)) || isNaN(parseFloat(item.Longitude)) ){
       //alert('One or more data points do not have location assigned to it. Sorry !');
       // render results as text instead.
+      return;
     }
 
     markers.push({ Title:item.Name_of_the_Marker, Description: item.Marker_Description,Marker:marker});
@@ -161,6 +162,7 @@
             removemarkers();
             data.forEach( (el) =>{
               addmarkers(el);
+              
             });
           }
             else{
