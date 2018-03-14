@@ -1,21 +1,52 @@
 const Models = require('./models/indexmodel');
 
 module.exports = {
+  DoesUserExist: function (mongoclient, url, usrcred){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, usrcred, searchForUser);
+    });
+  },
+  RegisterUser: function (mongoclient, url, usrcred){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, usrcred, registerUser);
+    });
+  },
+  UserTagLists: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, usertaglists);
+    });
+  },
+  RetrieveUserTagList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, retrievetaglist);
+    });
+  },
+  AddNewUserTagList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, newusertaglist);
+    });
+  },
+  RemoveUserTagList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, removeusertaglist);
+    });
+  },
+  AddMarkerToList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, addmarkertolist);
+    });
+  },
+  RemoveMarkerFromList: function (mongoclient, url, vm){
+    return new Promise( (resolve, reject) => {
+      synchronousSearch( resolve, reject, mongoclient, url, vm, removemarkerfromlist);
+    });
+  },
   searchHistoryForMap: function (mongoclient, url, vm){
 
-     // build new query object from vm
-     let queryobject = new Models.SearchFormModel();
-
-     if (vm.Historical_Marker_Id != '') {queryobject.Historical_Marker_Id = vm.Historical_Marker_Id}
-     if (vm.Category != '') {queryobject.Category = vm.Category}
-     if (vm.County != '') {queryobject.County = vm.County}
-     if (vm.Location_Description != '') {queryobject.Location_Description = vm.Location_Description}
-
-     // query db
+     var queryobject = new Models.SearchFormModel(vm);
      return new Promise( (resolve, reject) => {
        synchronousSearch( resolve, reject, mongoclient, url, queryobject, searchHistory);
      });
-
   },
   logSearchTermAndResults: function(mongoclient, url, results){
     return new Promise( (resolve, reject) => {
@@ -48,22 +79,118 @@ module.exports = {
 // function to syncrhonize select2 searching by wrapping promise-then template
 // on connect
 // removes code that is repeated throughout above
-function synchronousSearch(resolve, reject, mc, url, key, select2search){
+function synchronousSearch(resolve, reject, mc, url, key, function_name){
 
-       mc.connect(url)
-       .then( (client) => {
-            if ( key != null){
-              select2search(resolve, reject, client, key);
+   mc.connect(url)
+   .then( (client) => {
+        if ( key != null){
+          function_name(resolve, reject, client, key);
+        }
+      }).catch( (err) =>{console.log(err)});
+}
+
+function registerUser (resolve, reject, client, key){
+  var db = client.db('PHF');
+
+  db.collection('users').insert(new Models.RegisterUserModel(key))
+      .then( (list) => {
+          resolve('1');
+      }, (err)=>{
+          resolve('0');
+      });
+}
+
+function searchForUser(resolve, reject, client, key){
+
+  var db = client.db('PHF');
+  db.collection('users').find(key)
+      .toArray( (err, list) => {
+          (list.length > 0 ) ? resolve('1'):resolve('0');
+      });
+}
+
+function usertaglists(resolve, reject, client, vm){
+  var db = client.db('PHF');
+  db.collection('usertags').find({ user:vm.usrname})
+      .toArray( (err, list) => {
+          var results = {};
+          results.items = [];
+          if (list.length > 0){
+            list[0].lists.forEach( (el, i) => {
+                results.items.push(new Models.Select2ModelFromUserTagLists(el.name));
+            });
+          }
+          client.close();
+          resolve(results);
+      });
+}
+
+function retrievetaglist(resolve, reject, client, vm){
+  var db = client.db('PHF');
+  db.collection('usertags').find({ user:vm.usrname, 'lists.name': vm.listname})
+      .toArray( (err, list) => {
+          var results = {};
+          results.items = [];
+          if (list.length > 0){
+            list[0].lists.forEach( (el, i) => {
+              if (el.name == vm.listname){
+                results.ListName = el.name;
+                el.markers.forEach( (m, i) => {
+                  results.items.push(new Models.ModelFromUserTagList(m));
+                });
             }
-          }).catch( (err) =>{console.log(err)});
+            });
+          }
+          client.close();
+          resolve(results);
+      });
+}
+function newusertaglist(resolve, reject, client, key){
+  var db = client.db('PHF');
+  db.collection('usertags').update({user: key.User}, {'$push': { lists: { name:key.NameOfList, markers: []} }}, {upsert:true} )
+  .then( (result) =>{
+    resolve('1');
+  },
+    (err) => {
+      resolve(err);
+    });
+
+}
+function removeusertaglist(resolve, reject, client, key){
+  var db = client.db('PHF');
+  db.collection('usertags').update({user: key.User}, {'$pull': { lists: { name:key.NameOfList}}} )
+  .then( (result) =>{
+    resolve('1');
+  },
+    (err) => {
+      resolve('0');
+    });
+
+}
+function addmarkertolist(resolve, reject, client, key){
+  var db = client.db('PHF');
+  db.collection('usertags').update({user: key.User, 'lists.name': key.ListName}, {'$push': { 'lists.$.markers': { ListName:key.ListName, Title:key.Title, Description:key.Description } }} )
+  .then( (result) =>{
+    resolve('1');
+  });
+
+}
+
+function removemarkerfromlist(resolve, reject, client, key){
+  var db = client.db('PHF');
+  console.log(key);
+  db.collection('usertags').update({user: key.User, 'lists.name': key.NameOfList}, {'$pull': { 'lists.$.markers': { ListName: key.NameOfList, Title:key.ItemTitle } } } )
+  .then( (result) =>{
+    resolve('1');
+  },
+  (err) => {
+    resolve('0');
+  });
+
 }
 
 function searchHistory(resolve, reject, client, searchkey){
-  let results = new Models.SearchHistoryResultsModel();
-  results.items = [];
-  results.log = {};
-  results.log.searchTerms = searchkey;
-  results.log.logresults = [];
+  var results = new Models.SearchHistoryResultsModel(new Models.Log(searchkey));
 
   // queries for records with sub string searchkey
   // duplicates are then removed by searching the index
@@ -73,12 +200,13 @@ function searchHistory(resolve, reject, client, searchkey){
            if (list != null){
 
             list.forEach( (el, i) => {
-              let i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
+              var i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
               if (i === i2){
                 results.items.push(el);
-                results.log.logresults.push(el.Historical_Marker_Id);
+                results.log.searchResults.push(el.Historical_Marker_Id);
               }
             });
+            client.close();
            resolve(results);
           }
           client.close();
@@ -87,7 +215,7 @@ function searchHistory(resolve, reject, client, searchkey){
 
 function logSearchResults(resolve, reject, client, results){
 
-    let db = client.db('PHF');
+    var db = client.db('PHF');
       db.collection('searchlogs').insert(results.log, { w: 1 }).then( (err, doc) =>{
         client.close();
         resolve(results.items);
@@ -97,7 +225,7 @@ function logSearchResults(resolve, reject, client, results){
 }
 
 function searchMarker(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -109,7 +237,7 @@ function searchMarker(resolve, reject, client, searchkey){
            if (list != null){
 
             list.forEach( (el, i) => {
-              let i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
+              var i2 = list.findIndex(e => e.Historical_Marker_Id === el.Historical_Marker_Id);
                if (i === i2){
                  results.items.push({ id: el.Historical_Marker_Id, text: el.Name_of_the_Marker+'-'+el.Dedicated_Year });
                }
@@ -124,7 +252,7 @@ function searchMarker(resolve, reject, client, searchkey){
 }
 
 function searchCounty(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -135,7 +263,7 @@ function searchCounty(resolve, reject, client, searchkey){
 
            if (list != null){
             list = list.filter( (el, i) => {
-              let i2 = list.findIndex(e => e.County === el.County);
+              var i2 = list.findIndex(e => e.County === el.County);
                if (i === i2){
                  results.items.push({ id: el.County, text: el.County });
                }
@@ -151,7 +279,7 @@ function searchCounty(resolve, reject, client, searchkey){
 
 
 function searchCategory(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -161,7 +289,7 @@ function searchCategory(resolve, reject, client, searchkey){
          .toArray( (err, list) => {
            if (list != null){
             list = list.filter( (el, i) => {
-              let i2 = list.findIndex(e => e.Category === el.Category);
+              var i2 = list.findIndex(e => e.Category === el.Category);
                if (i === i2) {
                  results.items.push({ id: el.Category, text: el.Category });
                }
@@ -176,7 +304,7 @@ function searchCategory(resolve, reject, client, searchkey){
 }
 
 function searchLocationDescription(resolve, reject, client, searchkey){
-  let results = {};
+  var results = {};
   results.items = [];
 
   // queries for records with sub string searchkey
@@ -186,7 +314,7 @@ function searchLocationDescription(resolve, reject, client, searchkey){
                .toArray( (err, list) => {
                  if (list != null){
                   list = list.filter( (el, i) => {
-                    let i2 = list.findIndex(e => e.Location_Description === el.Location_Description);
+                    var i2 = list.findIndex(e => e.Location_Description === el.Location_Description);
                      if (i === i2) {
                        results.items.push({ id: el.Location_Description, text: el.Location_Description });
                      }
