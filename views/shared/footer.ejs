@@ -387,7 +387,7 @@ function getUsername(){
   if (document.cookie == ""){
     return '';
   }
-  return document.cookie.split(";")[1].split("=")[1];
+  return document.cookie.split("=")[1];
 }
 
 function logout(){
