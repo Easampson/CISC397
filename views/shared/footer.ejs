@@ -162,12 +162,12 @@
             removemarkers();
             data.forEach( (el) =>{
               addmarkers(el);
-              
+
             });
           }
             else{
               alert("Sorry! You need to be logged in to search for information");
-              window.location.assign("http://localhost:3000/login");
+              window.location.assign(EnvironmentUrl+"/login");
             }
           }
   });
@@ -188,7 +188,7 @@
       },
       success: function(data){
         $('#addnewtaglistModal').modal('toggle');
-        window.location.assign("http://localhost:3000/");
+        window.location.assign(EnvironmentUrl);
       }
     });
 
@@ -387,13 +387,15 @@ function getUsername(){
   if (document.cookie == ""){
     return '';
   }
-  return document.cookie.split("=")[1];
+  return document.cookie.split(";")[1].split("=")[1];
 }
 
 function logout(){
   document.cookie = "Username=";
-  window.location.assign("http://localhost:3000/login");
+  window.location.assign(EnvironmentUrl);
 }
+
+ var EnvironmentUrl = "http://ec2-18-219-163-99.us-east-2.compute.amazonaws.com:3000";
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGMa3dyfjmI9J09kMVCEo3ad7tCUdEXpQ&callback=initMap" async defer></script>
