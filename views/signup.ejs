@@ -90,7 +90,7 @@ function submitSignup(){
 
 				if (data.Username != '0' && data.Username != null){ // Signup success
           document.cookie = "Username="+data.Username;
-          window.location.assign("http://localhost:3000/");
+          window.location.assign("http://ec2-18-219-163-99.us-east-2.compute.amazonaws.com:3000/");
         }else {
           alert("Sorry! Signing up failed!");
         }
