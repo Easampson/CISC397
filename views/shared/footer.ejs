@@ -306,7 +306,7 @@ function refreshTagListView(e){
         var content = '<div class="row">'+
                       '<div class="col-md-12 col-sm-12 col-lg-12">'+
                       '<h3>'+el.Title+'</h3>'+
-                      '<div class="float-right"><button class="btn btn-danger" id="tagitemremovebutton" item-list="'+data.ListName+'" item-name="'+el.Title+'" onclick="removeitemfromlist()">Delete</button></div><br>'+
+                      '<div class="float-right"><button class="btn btn-danger" id="tagitemremovebutton" item-list="'+data.ListName+'" item-name="'+el.Title+'" onclick="removeitemfromlist(this);">Delete</button></div><br>'+
                       '<p>'+el.Description+'</p>'+
                       '</div>'+
                       '</div>'+
@@ -359,10 +359,10 @@ function removeTagList(){
   }
 }
 
-function removeitemfromlist(){
+function removeitemfromlist(el){
 
-  var itemtitle = $('#tagitemremovebutton').attr('item-name');
-  var itemlist = $('#tagitemremovebutton').attr('item-list');
+  var itemtitle = $(el).attr('item-name');
+  var itemlist = $(el).attr('item-list');
 
   $.ajax({
     url: '/removemarkerfromlist',
