@@ -1,6 +1,6 @@
 const Repository = require('../repository');
 const MongoClient = require('mongodb').MongoClient;
-const Models = require('../models/indexmodel');
+const Models = require('../models/model');
 const RandomString = require("randomstring");
 
 module.exports = {
@@ -71,6 +71,7 @@ module.exports = {
   HomePage: function(req, res){
     if (req.cookies.Username == '' || req.cookies.Username == null){
       res.render('login');
+      return;
     }
     res.render('index');
   },
@@ -107,5 +108,5 @@ module.exports = {
     Repository.searchLocationDescriptionList(MongoClient, url, term).then( (items) => {
     res.send(items);
   });
-  },
+  }
 }
