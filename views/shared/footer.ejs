@@ -19,6 +19,7 @@
               </select>
           </div>
           <button type="button" class="btn btn-success" onclick="addmarkertolist()">Add</button>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addnewtaglistModal">Add New List</button>
       </form>
       </div>
       <div class="modal-footer">
@@ -40,7 +41,6 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
-        <span><i>(Page will refresh after adding)</i></span>
         <form>
           <div class="form-group">
               <input type="text" class="form-control newlistname" placeholder="Enter name of new list" />
@@ -55,333 +55,66 @@
 
   </div>
 </div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
 <script>
 
-  // Script to open and close sidebar------------------------------------
-  // function w3_open() {
-  //     document.getElementById("mySidebar").style.display = "block";
-  //     document.getElementById("myOverlay").style.display = "block";
-  // }
-  //
-  // function w3_close() {
-  //     document.getElementById("mySidebar").style.display = "none";
-  //     document.getElementById("myOverlay").style.display = "none";
-  // }
-
   // Google Maps JS API------------------------------------
+  $(document).ready(function() {
 
-  var map;
-  var markers = [];
-  var infowindows = [];
-  var selectedmarker;
-
-  function initMap() {
-    if (document.getElementById('map')){
-
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: 39.952583, lng: -75.165222},
-      zoom: 6
-    });
-
-  }
-  }
-
-  function addmarkers(item){
-    var marker = new google.maps.Marker({
-              position: {lat:parseFloat(item.Latitude),lng:parseFloat(item.Longitude)},
-              map: map
-            });
-
-    if (isNaN(parseFloat(item.Latitude)) || isNaN(parseFloat(item.Longitude)) ){
-      //alert('One or more data points do not have location assigned to it. Sorry !');
-      // render results as text instead.
-      return;
-    }
-
-    markers.push({ Title:item.Name_of_the_Marker, Description: item.Marker_Description,Marker:marker});
-    marker.setMap(map);
-
-
-    var contentString = '<div id="content">'+
-            '<div id="markerInfo">'+
-            '</div>'+
-            '<h1 class="firstHeading">'+item.Name_of_the_Marker+'</h1>'+
-            '<div id="bodyContent">'+
-            '<p>'+item.Marker_Description+'</p>'+
-            '<button type="button" class="btn btn-info" data-toggle="modal" data-target="#tagItemModal">Tag Item</button>'+
-            '</div>'+
-            '</div>';
-
-    var infowindow = new google.maps.InfoWindow({
-      content: contentString
-    });
-
-    marker.addListener('click', function() {
-      infowindow.open(map, marker);
-      selectedmarker = markers.filter(m => {return m.Marker === marker;})[0];
-      console.log(selectedmarker);
-    });
-
-    infowindows.push(infowindow);
-
-  }
-
-  function removemarkers(){
-    for (var i = 0; i < markers.length; i++) {
-     markers[i].Marker.setMap(null);
-   }
-    markers = [];
-    infowindows = [];
-  }
-
-  function onSubmit(){
-
-    // get form values
-    let hid = $('#Name_Of_The_Marker').val();
-    let cat = $('#Category').val();
-    let cty = $('#County').val();
-    let ld = $('#Location_Description').val();
-
-    $.ajax({
-          url: "/searchHistoryForMap",
-          dataType:'json',
-          data: {
-            Historical_Marker_Id:hid,
-            Category: cat,
-            County: cty,
-            Location_Description: ld,
-            Username: getUsername()
-          },
-          type: 'POST',
-          success: function (data){
-            if ( data != '0'){
-            removemarkers();
-            data.forEach( (el) =>{
-              addmarkers(el);
-
-            });
-          }
-            else{
-              alert("Sorry! You need to be logged in to search for information");
-              window.location.assign(EnvironmentUrl+"/login");
-            }
-          }
-  });
-}
-  // adding new lists and tags------------------------------------
-
-  function addNewList(){
-
-    var nameoflist = $('.newlistname').val();
-
-    $.ajax({
-      url: '/addnewuserlist',
-      type: 'POST',
-      dataType: 'json',
-      data: {
-          NameOfList: nameoflist,
-          User: getUsername()
-      },
-      success: function(data){
-        $('#addnewtaglistModal').modal('toggle');
-        window.location.assign(EnvironmentUrl);
+      // assign username to usergreeting at top of Page
+      if (document.getElementById('usr')){
+        document.getElementById('usr').innerHTML = "Welcome @" + getUsername()+ '!';
       }
-    });
 
-  }
+      $('.select2.taglists').on('select2:select', (e)=>{
+        refreshTagListView(e);
+      });
 
-function addmarkertolist(){
-  var _listname = $('#addtousertaglist').val();
-if (_listname != null){
-  $.ajax({
-    url: '/addmarkertolist',
-    type: 'POST',
-    dataType: 'json',
-    data: {
-        Title: selectedmarker.Title,
-        Description: selectedmarker.Description,
-        User: getUsername(),
-        ListName:_listname
-    },
-    success: function(){
-      $('#tagItemModal').modal('toggle');
-    }
-  });
-}
-}
-
-
-// removing item from a list --------------------------------
-function removeitemfromlist(){
-
-  let listname = $('#tagitemremovebutton').attr('item-name');
-  if (_listname != null){
-    $.ajax({
-      url: '/removemarkerfromlist',
-      type: 'POST',
-      dataType: 'json',
-      data: {
-          User: getUsername(),
-          ListName:_listname
-      },
-      success: function(){
-        $('#tagItemModal').modal('toggle');
+      // add admin options if user is admin
+      if (getUsername() == 'admin'){
+        $('.admin-options').html('<button class="btn btn-info" onclick="redirecttodatamanager()"> Add/Delete Markers</button>');
       }
-    });
-  }
-}
-  // select2js------------------------------------
-  // In your Javascript (external .js resource or <script> tag)
-$(document).ready(function() {
-
-    // assign username to usergreeting at top of Page
-    if (document.getElementById('usr')){
-      document.getElementById('usr').innerHTML = "Welcome @" + getUsername()+ '!';
-    }
 
 
-    $('.select2').each(function(){
+      $('.select2').each(function(){
 
-          let url = this.getAttribute("url");
-          let enablesearch = this.getAttribute('minimumResultsForSearch') || 0;
-          let plcholder = this.getAttribute('placeholder') || 'Begin typing...';
+            let url = this.getAttribute("url");
+            let enablesearch = this.getAttribute('minimumResultsForSearch') || 0;
+            let plcholder = this.getAttribute('placeholder') || 'Begin typing...';
 
 
-          $(this).select2({
-            placeholder: plcholder,
-            allowClear: true,
-            width:"80%",
-            minimumResultsForSearch: enablesearch,
-            ajax: {
-              delay: 250,
-              url: url,
-              type:'POST',
-              dataType: 'json',
-              data: function (params) {
-                 return {
-                   term: params.term,
-                   usrname:getUsername()
-                 };
-              },
-              processResults: function (data) {
-                  // Tranforms the top-level key of the response object from 'items' to 'results'
-                  return {
-                    results: data.items
-                  };
+            $(this).select2({
+              placeholder: plcholder,
+              allowClear: true,
+              width:"80%",
+              minimumResultsForSearch: enablesearch,
+              ajax: {
+                delay: 250,
+                url: url,
+                type:'POST',
+                dataType: 'json',
+                data: function (params) {
+                   return {
+                     term: params.term,
+                     usrname:getUsername()
+                   };
+                },
+                processResults: function (data) {
+                    // Tranforms the top-level key of the response object from 'items' to 'results'
+                    return {
+                      results: data.items
+                    };
+                }
               }
-            }
-          });
-    });
-
-    $('.select2.taglists').on('select2:select', (e)=>{
-      refreshTagListView(e);
-    });
-
-}); // end of document ready function
-
-function refreshTagListView(e){
-  var data;
-  if (e === undefined){
-    data = {id:$('#usertaglists').val()};
-  }else{
-    data = e.params.data; // {id:<val>,text:<val>}
-  }
-
-  $.ajax({
-    url: '/retrievelist',
-    type: 'POST',
-    dataType: 'json',
-    data: {
-      usrname:getUsername(),
-      listname: data.id
-    },
-    success: function (data){
-      // render text results in template
-      var results = "";
-      data.items.forEach( (el, i)=>{
-        var content = '<div class="row">'+
-                      '<div class="col-md-12 col-sm-12 col-lg-12">'+
-                      '<h3>'+el.Title+'</h3>'+
-                      '<div class="float-right"><button class="btn btn-danger" id="tagitemremovebutton" item-list="'+data.ListName+'" item-name="'+el.Title+'" onclick="removeitemfromlist(this);">Delete</button></div><br>'+
-                      '<p>'+el.Description+'</p>'+
-                      '</div>'+
-                      '</div>'+
-                      '<hr/>';
-        results += content;
+            });
       });
 
-      if (data.items.length == 0){
-        results = '<div class="row">'+
-                      '<div class="col-md-12 col-sm-12 col-lg-12">'+
-                      '<h3> No Tags Present</h3>'+
-                      '</div>'+
-                      '</div>'+
-                      '<hr/>';
-      }
+  }); // end of document ready function
 
-      $('#usertaglistview').html(results);
-    }
-  });
-}
-
-function removeTagList(){
-  var data = {id:$('#usertaglists').val()};
-  if (data){
-      $.ajax({
-        url: '/removeuserlist',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-          User:getUsername(),
-          NameOfList: data.id
-        },
-        success: function (data){
-          // render text results in template
-          if (data == '0'){
-            alert('Error in deleting list!');
-          }
-
-          var results = '<div class="row">'+
-                        '<div class="col-md-12 col-sm-12 col-lg-12">'+
-                        '<h3> ...Select list to show tagged markers...</h3>'+
-                        '</div>'+
-                        '</div>'+
-                        '<hr/>';
-
-          $('#usertaglistview').html(results);
-          $('#usertaglists').val(null).trigger('change');
-        }
-      });
-  }
-}
-
-function removeitemfromlist(el){
-
-  var itemtitle = $(el).attr('item-name');
-  var itemlist = $(el).attr('item-list');
-
-  $.ajax({
-    url: '/removemarkerfromlist',
-    type: 'POST',
-    dataType: 'json',
-    data: {
-      User:getUsername(),
-      NameOfList: itemlist,
-      ItemTitle: itemtitle
-    },
-    success: function (data){
-      if (data == '0'){
-        alert('Error in deleting item from list!');
-      }
-
-      refreshTagListView();
-    }
-  });
-}
 
 function getUsername(){
   if (document.cookie == ""){
@@ -395,7 +128,7 @@ function logout(){
   window.location.assign(EnvironmentUrl);
 }
 
- var EnvironmentUrl = "http://ec2-18-219-163-99.us-east-2.compute.amazonaws.com:3000";
+ var EnvironmentUrl = "http://localhost:3000";//"http://ec2-18-219-163-99.us-east-2.compute.amazonaws.com:3000";
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGMa3dyfjmI9J09kMVCEo3ad7tCUdEXpQ&callback=initMap" async defer></script>

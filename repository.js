@@ -1,4 +1,4 @@
-const Models = require('./models/indexmodel');
+const Models = require('./models/model');
 
 module.exports = {
   DoesUserExist: function (mongoclient, url, usrcred){
@@ -178,7 +178,6 @@ function addmarkertolist(resolve, reject, client, key){
 
 function removemarkerfromlist(resolve, reject, client, key){
   var db = client.db('PHF');
-  console.log(key);
   db.collection('usertags').update({user: key.User, 'lists.name': key.NameOfList}, {'$pull': { 'lists.$.markers': { ListName: key.NameOfList, Title:key.ItemTitle } } } )
   .then( (result) =>{
     resolve('1');
@@ -299,7 +298,6 @@ function searchCategory(resolve, reject, client, searchkey){
            resolve(results);
          }
          client.close();
-
          });
 }
 
@@ -319,7 +317,6 @@ function searchLocationDescription(resolve, reject, client, searchkey){
                        results.items.push({ id: el.Location_Description, text: el.Location_Description });
                      }
                   });
-
                  client.close();
                  resolve(results);
                }

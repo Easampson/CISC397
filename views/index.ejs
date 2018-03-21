@@ -13,6 +13,7 @@
     <div class="pull-right">
       <p id="usr"></p>
      <button class="btn btn-success" type="button" onclick="logout()">Logout</button>
+
     </div>
     <br>
 
@@ -20,6 +21,8 @@
     <div class="w3-container" id="showcase">
       <h1 class="w3-jumbo"><b>PA Historical Landmarks</b></h1>
       <h1 class="w3-xxxlarge w3-text-red"><b>Search</b></h1>
+      <div class="admin-options">
+      </div>
       <hr style="width:50px;border:5px solid red" class="w3-round">
     </div>
 
@@ -108,7 +111,273 @@
 <!-- End page content -->
 </div>
 
+<script>
 
+  var map;
+  var markers = [];
+  var infowindows = [];
+  var selectedmarker;
+
+  function initMap() {
+    if (document.getElementById('map')){
+
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: 39.952583, lng: -75.165222},
+      zoom: 6
+    });
+
+  }
+  }
+
+  function addmarkers(item){
+    var marker = new google.maps.Marker({
+              position: {lat:parseFloat(item.Latitude),lng:parseFloat(item.Longitude)},
+              map: map
+            });
+
+    if (isNaN(parseFloat(item.Latitude)) || isNaN(parseFloat(item.Longitude)) ){
+      //alert('One or more data points do not have location assigned to it. Sorry !');
+      // render results as text instead.
+      return;
+    }
+
+    markers.push({ Title:item.Name_of_the_Marker, Description: item.Marker_Description,Marker:marker});
+    marker.setMap(map);
+
+
+    var contentString = '<div id="content">'+
+            '<div id="markerInfo">'+
+            '</div>'+
+            '<h1 class="firstHeading">'+item.Name_of_the_Marker+'</h1>'+
+            '<div id="bodyContent">'+
+            '<p>'+item.Marker_Description+'</p>'+
+            '<button type="button" class="btn btn-info" data-toggle="modal" data-target="#tagItemModal">Tag Item</button>'+
+            '</div>'+
+            '</div>';
+
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+
+    marker.addListener('click', function() {
+      infowindow.open(map, marker);
+      selectedmarker = markers.filter(m => {return m.Marker === marker;})[0];
+    });
+
+    infowindows.push(infowindow);
+
+  }
+
+  function removemarkers(){
+    for (var i = 0; i < markers.length; i++) {
+     markers[i].Marker.setMap(null);
+   }
+    markers = [];
+    infowindows = [];
+  }
+
+  function onSubmit(){
+
+    // get form values
+    let hid = $('#Name_Of_The_Marker').val();
+    let cat = $('#Category').val();
+    let cty = $('#County').val();
+    let ld = $('#Location_Description').val();
+
+    $.ajax({
+          url: "/searchHistoryForMap",
+          dataType:'json',
+          data: {
+            Historical_Marker_Id:hid,
+            Category: cat,
+            County: cty,
+            Location_Description: ld,
+            Username: getUsername()
+          },
+          type: 'POST',
+          success: function (data){
+            if ( data != '0'){
+            removemarkers();
+            data.forEach( (el) =>{
+              addmarkers(el);
+
+            });
+          }
+            else{
+              alert("Sorry! You need to be logged in to search for information");
+              window.location.assign(EnvironmentUrl+"/login");
+            }
+          }
+  });
+}
+  // adding new lists and tags------------------------------------
+
+  function addNewList(){
+
+    var nameoflist = $('.newlistname').val();
+
+    $.ajax({
+      url: '/addnewuserlist',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+          NameOfList: nameoflist,
+          User: getUsername()
+      },
+      success: function(data){
+        $('#addnewtaglistModal').modal('toggle');
+        //window.location.assign(EnvironmentUrl);
+      }
+    });
+
+  }
+
+function addmarkertolist(){
+  var _listname = $('#addtousertaglist').val();
+if (_listname != null){
+  $.ajax({
+    url: '/addmarkertolist',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+        Title: selectedmarker.Title,
+        Description: selectedmarker.Description,
+        User: getUsername(),
+        ListName:_listname
+    },
+    success: function(){
+      $('#tagItemModal').modal('toggle');
+    }
+  });
+}
+}
+
+
+// removing item from a list --------------------------------
+function removeitemfromlist(){
+
+  let listname = $('#tagitemremovebutton').attr('item-name');
+  if (_listname != null){
+    $.ajax({
+      url: '/removemarkerfromlist',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+          User: getUsername(),
+          ListName:_listname
+      },
+      success: function(){
+        $('#tagItemModal').modal('toggle');
+      }
+    });
+  }
+}
+  // select2js------------------------------------
+
+function redirecttodatamanager(){
+  window.location.assign(EnvironmentUrl+'/managelandmarks');
+}
+
+function refreshTagListView(e){
+  var data;
+  if (e === undefined){
+    data = {id:$('#usertaglists').val()};
+  }else{
+    data = e.params.data; // {id:<val>,text:<val>}
+  }
+
+  $.ajax({
+    url: '/retrievelist',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      usrname:getUsername(),
+      listname: data.id
+    },
+    success: function (data){
+      // render text results in template
+      var results = "";
+      data.items.forEach( (el, i)=>{
+        var content = '<div class="row">'+
+                      '<div class="col-md-12 col-sm-12 col-lg-12">'+
+                      '<h3>'+el.Title+'</h3>'+
+                      '<div class="float-right"><button class="btn btn-danger" id="tagitemremovebutton" item-list="'+data.ListName+'" item-name="'+el.Title+'" onclick="removeitemfromlist(this);">Delete</button></div><br>'+
+                      '<p>'+el.Description+'</p>'+
+                      '</div>'+
+                      '</div>'+
+                      '<hr/>';
+        results += content;
+      });
+
+      if (data.items.length == 0){
+        results = '<div class="row">'+
+                      '<div class="col-md-12 col-sm-12 col-lg-12">'+
+                      '<h3> No Tags Present</h3>'+
+                      '</div>'+
+                      '</div>'+
+                      '<hr/>';
+      }
+
+      $('#usertaglistview').html(results);
+    }
+  });
+}
+
+function removeTagList(){
+  var data = {id:$('#usertaglists').val()};
+  if (data){
+      $.ajax({
+        url: '/removeuserlist',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          User:getUsername(),
+          NameOfList: data.id
+        },
+        success: function (data){
+          // render text results in template
+          if (data == '0'){
+            alert('Error in deleting list!');
+          }
+
+          var results = '<div class="row">'+
+                        '<div class="col-md-12 col-sm-12 col-lg-12">'+
+                        '<h3> ...Select list to show tagged markers...</h3>'+
+                        '</div>'+
+                        '</div>'+
+                        '<hr/>';
+
+          $('#usertaglistview').html(results);
+          $('#usertaglists').val(null).trigger('change');
+        }
+      });
+  }
+}
+
+function removeitemfromlist(el){
+
+  var itemtitle = $(el).attr('item-name');
+  var itemlist = $(el).attr('item-list');
+
+  $.ajax({
+    url: '/removemarkerfromlist',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      User:getUsername(),
+      NameOfList: itemlist,
+      ItemTitle: itemtitle
+    },
+    success: function (data){
+      if (data == '0'){
+        alert('Error in deleting item from list!');
+      }
+
+      refreshTagListView();
+    }
+  });
+}
+</script>
 <%- include('shared/footer')  %>
 </body>
 

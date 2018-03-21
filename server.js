@@ -2,7 +2,7 @@ const Express = require('express');
 const BodyParser = require('body-parser');
 const NodeMailer = require('nodemailer');
 const Assert = require('assert');
-const Controller = require('./controllers/indexcontroller');
+const Controller = require('./controllers/controller');
 var CookieParser = require('cookie-parser')
 // Connection URL
 const url = 'mongodb://localhost:27017';
@@ -64,6 +64,7 @@ app.post('/addmarkertolist', (req,res) =>{
 app.post('/removemarkerfromlist', (req,res) =>{
   Controller.RemoveMarkerFromList(req, res, url, req.body);
 });
+
 /*---------------Select2 Requests--------------------*/
 
 app.post('/NameOfMarkerList', (req,res) =>{
