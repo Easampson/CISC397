@@ -19,7 +19,6 @@ module.exports = {
   RegisterUserModel: function(usrcred){
     this.Username = usrcred.Username;
     this.Password = usrcred.Password;
-    this.SessionID = '';
   },
   UserTagListsModel: function (vm){
     this.user = vm.Username;

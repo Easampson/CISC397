@@ -11,6 +11,8 @@ module.exports = {
   LoginSubmit:function (req, res, url){
     Repository.DoesUserExist(MongoClient, url, req.body).then( (result) =>{
       console.log(req.body.Username);
+      console.log(req.body.Password);
+      
         // send back success or failure status to add cookie on clientside
         if (result != '0'){
           res.send({
@@ -19,7 +21,6 @@ module.exports = {
         }else {
           res.send(result);
         }
-
     });
   },
   SignUp: function (req, res){

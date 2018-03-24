@@ -27,6 +27,7 @@
     "nodemailer": "^4.4.2",
     "nodemon": "1.15.1",
     "promise": "^8.0.1",
-    "randomstring": "^1.1.5"
+    "randomstring": "^1.1.5",
+    "request": "2.85.0"
   }
 }

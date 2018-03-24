@@ -103,7 +103,7 @@ function registerUser (resolve, reject, client, key){
 function searchForUser(resolve, reject, client, key){
 
   var db = client.db('PHF');
-  db.collection('users').find(key)
+  db.collection('users').find({Username:key.Username, Password:key.Password})
       .toArray( (err, list) => {
           (list.length > 0 ) ? resolve('1'):resolve('0');
       });
