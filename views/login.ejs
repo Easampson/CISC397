@@ -61,7 +61,7 @@ input[type="password"] {
 
 			  <input type="text" class="form-control Username" placeholder="Username" required="" autofocus="" />
 			  <input type="password" class="form-control Password" placeholder="Password" required=""/>
-
+        <div class="g-recaptcha" data-sitekey="6LdpjU4UAAAAAGfeG9ZoPwk2u088wqV-bVwauEmg"></div>
 			  <button class="btn btn-lg btn-primary pull-left" type="button" onclick="submitLogin()">Login</button>
         <a class="btn btn-success pull-right" href="/signup">Or Sign Up</a>
   </form>
@@ -70,13 +70,14 @@ input[type="password"] {
 </div>
 
 <%- include('shared/footer')  %>
-
+<script src='https://www.google.com/recaptcha/api.js'></script>
 <script type="text/javascript">
 
 function submitLogin(){
 
   var usr = $('.Username').val();
   var pass = hex_md5($('.Password').val());
+  var g_recaptcha = grecaptcha.getResponse();
 
   $.ajax({
       url :'/submitlogin',
@@ -84,7 +85,8 @@ function submitLogin(){
       dataType: 'JSON',
       data: {
         Username: usr,
-        Password: pass
+        Password: pass,
+        g_recaptcha: g_recaptcha
       },
       success: function(data){
         if (data.Username != '0' && data.Username != null){ // login success

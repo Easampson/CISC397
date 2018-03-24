@@ -3,7 +3,8 @@ const BodyParser = require('body-parser');
 const NodeMailer = require('nodemailer');
 const Assert = require('assert');
 const Controller = require('./controllers/controller');
-var CookieParser = require('cookie-parser')
+const CookieParser = require('cookie-parser');
+const request = require('request');
 // Connection URL
 const url = 'mongodb://localhost:27017';
 
@@ -28,6 +29,26 @@ app.get('/login', (req,res)=>{
 });
 
 app.post('/submitlogin', (req,res) =>{
+  
+  var secretKey = '6LdpjU4UAAAAADPPfFNmW9XRc1uQgPhEvOMkBHx4';
+
+  if(req.body['g_recaptcha'] === undefined || req.body['g_recaptcha'] === '' || req.body['g_recaptcha'] === null)
+  {
+    console.log("g_recaptchais an empty string or undefined or null");
+    return res.json({"responseError" : "Please select captcha first"});
+  }
+ 
+  const verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + req.body['g_recaptcha'];
+
+  request(verificationURL,function(error,response,_body) {
+    var body = JSON.parse(_body);
+    console.log("status of verification request:");
+    console.log(body);
+    if(body.success !== undefined && !body.success) {
+      return res.json({"responseError" : "Failed captcha verification"});
+    }
+  });
+
   Controller.LoginSubmit(req, res, url);
 });
 
