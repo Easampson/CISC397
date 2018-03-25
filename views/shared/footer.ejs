@@ -70,6 +70,9 @@
         document.getElementById('usr').innerHTML = "Welcome @" + getUsername()+ '!';
       }
 
+      // Prompt Liability Agreement
+      promptLiabilityAgreement()
+
       $('.select2.taglists').on('select2:select', (e)=>{
         refreshTagListView(e);
       });
