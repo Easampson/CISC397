@@ -56,6 +56,10 @@
   </div>
 </div>
 
+<footer>
+  <p><small>Disclaimer - We in no way recommend traveling to phyiscal locations without proper due dilligence on YOUR part.</small></p>
+</footer>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
@@ -74,10 +78,10 @@
         refreshTagListView(e);
       });
 
-      // add admin options if user is admin
-      if (getUsername() == 'admin'){
-        $('.admin-options').html('<button class="btn btn-info" onclick="redirecttodatamanager()"> Add/Delete Markers</button>');
-      }
+      // // add admin options if user is admin
+      // if (getUsername() == 'admin'){
+      //   $('.admin-options').html('<button class="btn btn-info" onclick="redirecttodatamanager()"> Add/Delete Markers</button>');
+      // }
 
 
       $('.select2').each(function(){
@@ -120,7 +124,7 @@ function getUsername(){
   if (document.cookie == ""){
     return '';
   }
-  return document.cookie.split("=")[1];
+  return /Username=(.*)/.exec(document.cookie)[0].split('=')[1].replace(';','');
 }
 
 function logout(){
@@ -128,7 +132,7 @@ function logout(){
   window.location.assign(EnvironmentUrl);
 }
 
- var EnvironmentUrl = "http://ec2-18-188-167-99.us-east-2.compute.amazonaws.com:3000";
+ var EnvironmentUrl = "http://ec2-13-59-3-102.us-east-2.compute.amazonaws.com:3000";
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGMa3dyfjmI9J09kMVCEo3ad7tCUdEXpQ&callback=initMap" async defer></script>
