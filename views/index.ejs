@@ -108,6 +108,20 @@
 </div> <!-- End of tagging row -->
 
 
+<!-- Liability Agreement -->
+<div class="w3-modal" id="agreement">
+  <div class="w3-modal-content w3-card">
+    <header class="w3-container w3-sand">
+      <h2>Disclaimer</h2>
+    </header>
+    <div class="w3-container">
+      <p>The creators of this project (PA Historical Landmarks) hold no liability for loss or injury resulting from its use. This project utilizes the Google Maps APIs and is subject to its <a href="https://developers.google.com/maps/terms">Terms of Service</a>. In using this project you acknowledge to have agreed to use Google Services under their <a href="https://maps.google.com/help/terms_maps.html"> Additional Terms of Service </a> as well as assume risk for any adventures.</p>
+
+      <button type="button" class="btn btn-danger w3-red" onclick=closeAgreement()>I agree</button>
+    </div>
+  </div>
+</div>
+
 <!-- End page content -->
 </div>
 
@@ -154,6 +168,7 @@
             '<button type="button" class="btn btn-info" data-toggle="modal" data-target="#tagItemModal">Tag Item</button>'+
             '</div>'+
             '</div>';
+
 
     var infowindow = new google.maps.InfoWindow({
       content: contentString
@@ -320,6 +335,16 @@ function refreshTagListView(e){
       $('#usertaglistview').html(results);
     }
   });
+}
+
+// Liability Agreement
+function promptLiabilityAgreement(){
+    if (document.getElementById('usr'))
+    document.getElementById('agreement').style.display='block'
+}
+
+function closeAgreement(){
+  document.getElementById('agreement').style.display='none'
 }
 
 function removeTagList(){
