@@ -42,8 +42,8 @@ module.exports = {
     });
   },
   searchHistoryForMap: function (mongoclient, url, vm){
-
      var queryobject = new Models.SearchFormModel(vm);
+    console.log(queryobject);
      return new Promise( (resolve, reject) => {
        synchronousSearch( resolve, reject, mongoclient, url, queryobject, searchHistory);
      });
