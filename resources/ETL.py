@@ -29,7 +29,7 @@ def readFile(filename, encoding = "ISO-8859-1"):
 
                 # construct document object to insert into PHF collection named markers
                 marker = {
-                    'Historical_Marker_Id': c[0],
+                    'Historical_Marker_Id': int(c[0]),
                     'Name_of_the_Marker': f'{c[1]}',
                     'County': f'{c[2]}',
                     'Dedicated_Year': c[3],
