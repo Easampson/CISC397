@@ -42,8 +42,8 @@ module.exports = {
     });
   },
   searchHistoryForMap: function (mongoclient, url, vm){
-
      var queryobject = new Models.SearchFormModel(vm);
+    console.log(queryobject);
      return new Promise( (resolve, reject) => {
        synchronousSearch( resolve, reject, mongoclient, url, queryobject, searchHistory);
      });
@@ -190,11 +190,12 @@ function removemarkerfromlist(resolve, reject, client, key){
 
 function searchHistory(resolve, reject, client, searchkey){
   var results = new Models.SearchHistoryResultsModel(new Models.Log(searchkey));
+  var searchModel = new Models.SearchHistoryModel(searchkey);
 
   // queries for records with sub string searchkey
   // duplicates are then removed by searching the index
   var db = client.db('PHF');
-  db.collection('markers').find(searchkey) // searchkey must be a queryobject
+  db.collection('markers').find(searchModel) // searchkey must be a queryobject
          .toArray( (err, list) => {
            if (list != null){
 
